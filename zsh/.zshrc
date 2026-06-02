@@ -134,9 +134,11 @@ export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 export PATH=$PATH:/usr/local/go/bin
 export PATH="$PATH:/usr/local"
+export PATH="$PATH:/usr/include"
 export PATH="$PATH:/usr/local/odin"
 export PATH=$PATH:/home/.local/bin
 export PATH=$PATH:/home/sijirama/go/bin
+export PATH=$PATH:/home/sijirama/Desktop/me/coder/lamina/bin
 export PATH=$PATH:~/bin
 export PATH=$PATH:~/bin/odin
 export PATH=$PATH:~/bin/zig
@@ -148,3 +150,20 @@ export PATH="$PATH:/opt/nvim-linux64/bin"
 export PATH="$PATH:/usr/local/bin"
 export PATH="$PATH:/opt/nvim-linux64/bin"
 
+
+# opencode
+export PATH=/home/sijirama/.opencode/bin:$PATH
+
+
+
+
+
+
+
+
+export PATH="/home/sijirama/Desktop/me/coder/llama.cpp/build/bin:$PATH"
+
+
+# mnesh shell hook
+export PATH="/home/sijirama/.mnesh/bin":$PATH
+[[ -f "/home/sijirama/.mnesh/hooks/mnesh.zsh" ]] && source "/home/sijirama/.mnesh/hooks/mnesh.zsh"
