@@ -122,11 +122,16 @@ fcd() {
     fi
 }
 
-# fuzzy-find your own aliases (shows name = definition); drops the name onto your prompt
+# fuzzy-find your aliases AND functions; previews the definition, drops the name on your prompt
 fa() {
-    local pick
-    pick=$(alias | sed 's/^alias //' | fzf --height=40% --reverse --prompt='alias> ') || return
-    print -z "${pick%%=*} "
+    local f=~/.bash_aliases pick
+    pick=$( { sed -nE 's/^alias ([A-Za-z0-9_.:-]+)=.*/\1/p' "$f"; \
+              sed -nE 's/^([A-Za-z0-9_-]+) *\(\).*/\1/p' "$f"; } \
+            | sort -u \
+            | fzf --height=50% --reverse --prompt='cmd> ' \
+                  --preview 'zsh -fc "source ~/.bash_aliases 2>/dev/null; which {}" 2>/dev/null' \
+                  --preview-window='right:55%:wrap') || return
+    print -z "$pick "
 }
 
 # fuzzy-find file(s) with a bat preview on the right, then open in nvim (tab/select multiple)
