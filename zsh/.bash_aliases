@@ -122,14 +122,29 @@ fcd() {
     fi
 }
 
-# fuzzy-find your aliases AND functions; previews the definition, drops the name on your prompt
+# preview helper for `fa`: prints the description comment(s) above/beside an entry + its definition
+_fa_preview() {
+    local name=$1 f=~/.bash_aliases
+    awk -v n="$name" '
+        function flush(){ for (i=1;i<=cn;i++) print c[i] }
+        /^[[:space:]]*#INFO:/           { next }
+        /^[[:space:]]*#/                { c[++cn]=$0; next }
+        $0 ~ "^alias "n"="              { flush(); if (match($0,/#.*/)) print substr($0,RSTART); exit }
+        $0 ~ "^"n"[[:space:]]*\\(\\)"   { flush(); exit }
+        { cn=0 }
+    ' "$f"
+    echo "──────────"
+    which "$name" 2>/dev/null
+}
+
+# fuzzy-find your aliases AND functions; preview shows description + definition, drops name on prompt
 fa() {
     local f=~/.bash_aliases pick
     pick=$( { sed -nE 's/^alias ([A-Za-z0-9_.:-]+)=.*/\1/p' "$f"; \
               sed -nE 's/^([A-Za-z0-9_-]+) *\(\).*/\1/p' "$f"; } \
-            | sort -u \
+            | grep -v '^_' | sort -u \
             | fzf --height=50% --reverse --prompt='cmd> ' \
-                  --preview 'zsh -fc "source ~/.bash_aliases 2>/dev/null; which {}" 2>/dev/null' \
+                  --preview 'zsh -fc "source ~/.bash_aliases 2>/dev/null; _fa_preview {}"' \
                   --preview-window='right:55%:wrap') || return
     print -z "$pick "
 }
