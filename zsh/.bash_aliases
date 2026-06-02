@@ -129,6 +129,16 @@ fa() {
     print -z "${pick%%=*} "
 }
 
+# fuzzy-find file(s) with a bat preview on the right, then open in nvim (tab/select multiple)
+fv() {
+    local files
+    files=$(fdfind --type f --hidden --exclude .git --exclude node_modules 2>/dev/null \
+            | fzf -m \
+                  --preview 'bat --color=always --style=numbers --line-range=:500 {}' \
+                  --preview-window='right:60%:wrap') || return
+    [ -n "$files" ] && nvim ${(f)files}
+}
+
 # make a directory (and parents) then cd straight into it
 mkcd() { mkdir -p "$1" && cd "$1"; }
 
