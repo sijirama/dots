@@ -56,6 +56,11 @@ alias screen-rotate='xrandr --output HDMI-1 --rotate left'
 alias gs='git status'
 alias ga='git add .'
 alias gp='git push'
+alias gl='git log --oneline --graph --decorate --all'
+alias gpr='gh pr checkout'   # gpr 123 -> checkout PR #123
+
+#INFO: gh aliases
+alias ghs='gh auth switch'   # toggle active github account
 
 gitall() {
     git add .
@@ -99,10 +104,29 @@ fkill() {
     [ -n "$pids" ] && echo "$pids" | xargs kill -"${1:-9}"
 }
 
-# fuzzy-cd into any subdirectory below the current (or given) path
+# fuzzy-cd into a subdirectory (skips noise: .git, node_modules, caches, build dirs)
 fcd() {
     local dir
-    dir=$(find "${1:-.}" -type d 2>/dev/null | fzf) && cd "$dir"
+    if command -v fdfind >/dev/null 2>&1; then
+        dir=$(fdfind --type d --hidden \
+                --exclude .git --exclude node_modules --exclude .cache \
+                --exclude dist --exclude build --exclude target --exclude vendor \
+                --exclude .venv --exclude __pycache__ --exclude .next \
+                . "${1:-.}" 2>/dev/null | fzf) && cd "$dir"
+    else
+        dir=$(find "${1:-.}" -type d \
+                \( -name .git -o -name node_modules -o -name .cache -o -name dist \
+                   -o -name build -o -name target -o -name vendor -o -name .venv \
+                   -o -name __pycache__ -o -name .next \) -prune \
+                -o -type d -print 2>/dev/null | fzf) && cd "$dir"
+    fi
+}
+
+# fuzzy-find your own aliases (shows name = definition); drops the name onto your prompt
+fa() {
+    local pick
+    pick=$(alias | sed 's/^alias //' | fzf --height=40% --reverse --prompt='alias> ') || return
+    print -z "${pick%%=*} "
 }
 
 # make a directory (and parents) then cd straight into it
@@ -125,6 +149,25 @@ extract() {
         *)         echo "extract: don't know how to handle '$1'" ;;
     esac
 }
+
+#INFO: quality-of-life (the classics)
+# re-run the previous command with sudo (pairs with your `fucking`)
+alias please='sudo $(fc -ln -1)'
+# hop up directories fast
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+# print $PATH one entry per line (handy after editing it)
+alias path='echo $PATH | tr ":" "\n"'
+# re-source your shell config without a new terminal
+alias reload='source ~/.zshrc'
+# instant static file server in the current dir (serve / serve 3000)
+serve() { python3 -m http.server "${1:-8000}"; }
+# what's my public IP / local IP
+alias myip='curl -s ifconfig.me; echo'
+localip() { ip route get 1.1.1.1 2>/dev/null | awk '{print $7; exit}'; }
+# biggest files/dirs right here, sorted
+alias dush='du -sh ./* 2>/dev/null | sort -rh | head -20'
 
 #INFO: Tmux aliases
 
